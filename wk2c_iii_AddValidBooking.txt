@@ -1,0 +1,20 @@
+/*3. To check whether a table in the restaurant is already booked.*/
+DROP PROCEDURE IF EXISTS AddValidBooking ;
+DELIMITER //
+CREATE PROCEDURE AddValidBooking(mybookdate DATE, mytable INT)
+BEGIN
+START TRANSACTION;
+INSERT INTO Bookings (TableNo, BookingDate) VALUES (mytable, mybookdate);
+SELECT @bookingid := BookingID FROM Bookings WHERE TableNo = mytable AND BookingDate=mybookdate;
+IF NOT @bookingid IS NULL
+	THEN ROLLBACK; 
+    SELECT CONCAT("Table ", mytable, " is already booked") AS 'Booking Status';
+ELSE
+	INSERT INTO Bookings (TableNo, BookingDate) VALUES (mytable, mybookdate);
+	COMMIT;
+	SELECT CONCAT("Table ", mytable," is not booked -- Booking created") AS 'Booking Status';
+END IF;
+END //
+DELIMITER ;
+
+Call AddValidBooking('2022-11-12', 6);
